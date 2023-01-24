@@ -1,0 +1,40 @@
+version: "3"
+services:
+  proxy:
+    container_name: flower-proxy
+    build: ./docker/nginx
+    ports:
+      - "8000:80"
+    volumes:
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./src:/usr/share/nginx/html
+  app:
+    container_name: flower-app
+    build: ./docker/php
+    volumes:
+      - ./docker/php/php.ini:/usr/local/php/php.ini
+      - ./src:/var/www/html
+  db:
+    container_name: flower-db
+    build: ./docker/mysql
+    ports:
+      - 3306:3306
+    volumes:
+      - ./docker/mysql/my.cnf:/etc/mysql/my.cnf
+      - flower-db-volume:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: laravel_db
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+  phpmyadmin:
+    container_name: flower-phpmyadmin
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - 8001:80
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOST=db
+      - PMA_ROOT_PASSWORD=rootpassword
+volumes:
+  flower-db-volume:
